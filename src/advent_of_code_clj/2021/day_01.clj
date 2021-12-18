@@ -1,8 +1,8 @@
 (ns advent-of-code-clj.2021.day-01
-  (:require [advent-of-code-clj.core :as core])
-  (:require [clojure.repl :refer [doc]]))
+  (:require [advent-of-code-clj.core :as core]
+            [clojure.repl :refer [doc]]))
 
-;; --- Day 1: Sonar Sweep ---
+;; -- dya1: Sonar Sweep --
 ;; https://adventofcode.com/2021/day/1
 
 (def input (core/get-input 2021 01))
