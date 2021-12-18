@@ -12,7 +12,8 @@
        (re-seq #"-?\d+")
        (map #(Integer/parseInt %))))
 
-(defn solve [input]
+;; part-1
+(defn part-1 [input]
   (as-> input $
     (read-numbers $)
     (partition 2 1 $)
@@ -20,7 +21,20 @@
     (filter true? $)
     (count $)))
 
-(solve input)
+(part-1 input)
+
+;; part 2
+(defn part-2 [input]
+  (as-> input $
+    (read-numbers $)
+    (partition 3 1 $)
+    (map #(apply + %) $)
+    (partition 2 1 $)
+    (map #(< (first %) (second %)) $)
+    (filter true? $)
+    (count $)))
+
+(part-2 input)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; comment
@@ -44,7 +58,7 @@
       (filter #(= 2020 (apply + %)) $)
       (apply * (first $))))
 
-  (defn solve
+  (defn part-1
     "Day 01 Part 1"
     [input]
     (as-> input $
@@ -54,7 +68,7 @@
       (apply * (first $))))
 
 
-  (defn solve [input]
+  (defn part-1 [input]
     (->> (partition 2 1 input)
          (map (fn [[a b]] (< a b)))
          (filter true?)
