@@ -21,6 +21,7 @@
     (filter true? $)
     (count $)))
 
+
 (part-1 input)
 
 ;; part 2

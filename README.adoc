@@ -4,5 +4,8 @@
 
 == Ref
 
+- https://github.com/slotThe/AOC-2021
+- https://github.com/unparalloser/advent-of-code-2021
 - https://github.com/zelark/AoC-2021
 - https://github.com/rjray/advent-2020-clojure/
+- https://github.com/Bogdanp/awesome-advent-of-code#clojure

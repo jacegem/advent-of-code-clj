@@ -11,8 +11,3 @@
 (deftest part2
   (let [expected 1739]
     (is (= expected (part-2 (get-input 2021 01))))))
-
-(run-tests 'advent-of-code-clj.2021.day-01-test)
-
-;; 기존 이름이 남아 있어서 삭제
-(ns-unmap *ns* 'part1)
