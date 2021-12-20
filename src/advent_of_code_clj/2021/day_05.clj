@@ -1,7 +1,6 @@
 (ns advent-of-code-clj.2021.day-05
   (:require [advent-of-code-clj.core :refer [get-input get-lines]]))
 
-
 ;; --- Day 5: Hydrothermal Venture ---
 ;; https://adventofcode.com/2021/day/5
 
@@ -25,25 +24,33 @@
   (let [{:keys [y1 y2]} line]
     (= y1 y2)))
 
+(defn diff [v1 v2]
+  (Math/abs (- v2 v1)))
+
+(defn is-diagonal? [line]
+  (let [{:keys [x1 y1 x2 y2]} line]
+    (= (diff x1 x2) (diff y1 y2))))
+
 (defn get-hv-lines [input]
   (let [lines (parse-list input)]
     (filter #(or (is-horizontal? %) (is-vertical? %)) lines)))
 
-(defn get-range [start end]
-  (let [s (min start end)
-        e (max start end)]
-    (range s (inc e))))
+(defn get-range [v1 v2]
+  (if (< v1 v2)
+    (range v1 (inc v2))
+    (reverse (range v2 (inc v1)))))
 
-(defn get-coordinates [line]
+(defn get-coordinates [line & {:keys [with-diagonal] :or {with-diagonal false}}]
   (let [{:keys [x1 y1 x2 y2]} line]
     (cond
       (is-horizontal? line) (map #(vector % y1) (get-range x1 x2))
-      (is-vertical? line) (map #(vector x1 %) (get-range y1 y2)))))
+      (is-vertical? line) (map #(vector x1 %) (get-range y1 y2))
+      (and (true? with-diagonal) (is-diagonal? line))  (map vector (get-range x1 x2) (get-range y1 y2)))))
 
 (defn part-1 []
   (let [input (get-lines 2021 5)]
     (as-> input $
-      (map #(get-coordinates %)
+      (map #(get-coordinates % :with-diagonal false)
            (parse-list $))
       (apply concat $)
       (frequencies $)
@@ -51,10 +58,27 @@
       (count $))))
 
 (part-1)
+;; 6856
 
+(defn part-2 []
+  (let [input (get-lines 2021 5)]
+    (as-> input $
+      (map #(get-coordinates % :with-diagonal true)
+           (parse-list $))
+      (apply concat $)
+      (frequencies $)
+      (filter #(< 1 (val %)) $)
+      (count $))))
 
+(part-2)
+;; 20666
 
 (comment
+;; (defn get-range [start end]
+;;   (let [s (min start end)
+;;         e (max start end)]
+;;     (range s (inc e))))  
+  (get-range 22 4)
   (map #(get-coordinates %)
        (parse-list input))
   (def coords
@@ -64,7 +88,6 @@
   (as-> input $
     (map #(get-coordinates %)
          (parse-list $))
-
     (apply concat $)
     (frequencies $)
     (filter #(< 1 (val %)) $)
@@ -89,4 +112,5 @@
   (parse-list input)
   ;; horizontal or vertical line
   (get-hv-lines input)
+  ;; https://github.com/yyna/advent-of-code/blob/main/src/_2021/day_5.clj
   '())
