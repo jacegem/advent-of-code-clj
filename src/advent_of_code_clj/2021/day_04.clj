@@ -16,14 +16,12 @@
   (def input (get-lines 2021 04))
   input
 
-
-
   (defn parse-line [s]
     (map #(Integer/parseInt %) (re-seq #"\d+" s)))
 
   (map #(parse-line %) input)
 
-  (parse-line "")  
+  (parse-line "")
 
   (defn parse-numbers [line]
     (re-seq #"\d+" line))
