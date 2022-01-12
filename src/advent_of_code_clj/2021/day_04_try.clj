@@ -1,4 +1,4 @@
-(ns advent-of-code-clj.2021.day-04
+(ns advent-of-code-clj.2021.day-04-try
   (:require [advent-of-code-clj.core :refer [get-input get-lines]]
             [clojure.string :refer [split-lines join]]
             [clojure.repl :refer [doc]]))

@@ -9,8 +9,8 @@
 (defn parse-line [line]
   (let [[x1 y1 x2 y2]
         (as-> line $
-          (re-seq #"\d+" $)
-          (map #(Integer/parseInt %) $))]
+              (re-seq #"\d+" $)
+              (map #(Integer/parseInt %) $))]
     {:x1 x1 :y1 y1 :x2 x2 :y2 y2}))
 
 (defn parse-list [input]
@@ -24,7 +24,7 @@
   (let [{:keys [y1 y2]} line]
     (= y1 y2)))
 
-(defn diff [v1 v2]
+(defn diff [^int v1 ^int v2]
   (Math/abs (- v2 v1)))
 
 (defn diagonal? [line]
@@ -41,17 +41,17 @@
     (cond
       (horizontal? line) (map #(vector % y1) (get-range x1 x2))
       (vertical? line) (map #(vector x1 %) (get-range y1 y2))
-      (and (true? with-diagonal) (diagonal? line))  (map vector (get-range x1 x2) (get-range y1 y2)))))
+      (and (true? with-diagonal) (diagonal? line)) (map vector (get-range x1 x2) (get-range y1 y2)))))
 
 (defn part-1 []
   (let [input (get-lines 2021 5)]
     (as-> input $
-      (map #(get-coordinates % :with-diagonal false)
-           (parse-list $))
-      (apply concat $)
-      (frequencies $)
-      (filter #(< 1 (val %)) $)
-      (count $))))
+          (map #(get-coordinates % :with-diagonal false)
+               (parse-list $))
+          (apply concat $)
+          (frequencies $)
+          (filter #(< 1 (val %)) $)
+          (count $))))
 
 (part-1)
 ;; 6856
@@ -59,21 +59,21 @@
 (defn part-2 []
   (let [input (get-lines 2021 5)]
     (as-> input $
-      (map #(get-coordinates % :with-diagonal true)
-           (parse-list $))
-      (apply concat $)
-      (frequencies $)
-      (filter #(< 1 (val %)) $)
-      (count $))))
+          (map #(get-coordinates % :with-diagonal true)
+               (parse-list $))
+          (apply concat $)
+          (frequencies $)
+          (filter #(< 1 (val %)) $)
+          (count $))))
 
 (part-2)
 ;; 20666
 
 (comment
-;; (defn get-range [start end]
-;;   (let [s (min start end)
-;;         e (max start end)]
-;;     (range s (inc e))))  
+  ;; (defn get-range [start end]
+  ;;   (let [s (min start end)
+  ;;         e (max start end)]
+  ;;     (range s (inc e))))
 
   (defn get-hv-lines [input]
     (let [lines (parse-list input)]
@@ -86,17 +86,17 @@
          (parse-list input)))
   coords
   (as-> input $
-    (map #(get-coordinates %)
-         (parse-list $))
-    (apply concat $)
-    (frequencies $)
-    (filter #(< 1 (val %)) $)
-    (count $))
+        (map #(get-coordinates %)
+             (parse-list $))
+        (apply concat $)
+        (frequencies $)
+        (filter #(< 1 (val %)) $)
+        (count $))
 
   (frequencies (apply concat coords))
   (vector 2 3)
   (map #(vector % 1) (get-range 2 3))
-  (get-coordinates  {:x1 663, :y1 895, :x2 663, :y2 559})
+  (get-coordinates {:x1 663, :y1 895, :x2 663, :y2 559})
   (get-range 895 559)
   (range 2 9)
   (defn my-range
