@@ -8,11 +8,17 @@
 (def input
     (slurp "resources/2018/input_01.txt"))
 
+input
+
 (def splited
     (string/split-lines input))
 
+splited
+
 (def parsed
     (map #(Integer/parseInt %) splited))
+
+parsed
 
 (def part-1
     (reduce + 0 parsed))
@@ -84,16 +90,15 @@ part-1
   )
 )
 
-(loop [result #{0}
-       sum 0
-       [v & rem] (cycle parsed)]
-  (let [next-sum (+ sum v)]
-    (if (result next-sum)
-      next-sum
-      (recur (conj result next-sum) next-sum rem)    
-    )
-  )
-)
+;; loop recur, 하이레벨 함수를 이용한 리펙토한
+;; doc
+;; vscode - calva
+;; 함수의 조합으로 
+;; loop, recur 금지, 시퀀스 함수 사용
+;; rem 이름 문제 발생 가능
+;; first, rest 함수 사용
+
+
 
 (take 10 (cycle [1 2 3]))
 

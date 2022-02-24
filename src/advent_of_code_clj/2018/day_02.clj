@@ -8,8 +8,11 @@
 ;; --- Day 2: Inventory Management System ---
 
 (def line "pnebjusalrdgckzfihvtxywyml")
+
 (def words
   (string/split line #""))
+
+words
 
 (def input
     (slurp "resources/2018/input_02.txt"))
@@ -17,29 +20,75 @@
 (def splited
     (string/split-lines input))
 
-
+splited
 
 (def parsed
     (map #(string/split % #"") splited))
 
 parsed
 
-(defn has-times [coll n]
-  (if (some #{n}
+(defn has-n-times [coll n]
+  (some #{n}
             (vals
              (frequencies coll)))
-    true
-    false))
+    )
+
+;; (frequencies "abasdfsadfsda")
     
 (defn get-count [times]
   (count
-   (filter #(= % true)
-           (map #(has-times % times) parsed))))
+   (filter #(has-n-times % times) parsed)))
 
 (def part-1
   (* (get-count 2) (get-count 3)))
   
 part-1
+
+;; 범용적 이름보다, 네이밍 싱크 목적, 재사용 가능하도록 
+;; 
+
+
+
+
+
+
+(comment
+  (contains?
+   (vec
+    (vals
+     (frequencies words))) 3)
+
+  (contains? [1 2 3 4] 5)
+
+  (defn has-n-times [coll n]
+    (contains?
+     (vec
+      (vals
+       (frequencies coll))) n))
+
+
+  (some #{2}
+        (vals
+         (frequencies (first parsed))))
+
+
+  (has-n-times (first parsed) 3)
+
+  (first parsed)
+
+  (has-n-times (first parsed) 3)
+
+  (def count-2
+    (get-count 2))
+  (def count-3
+    (get-count 3))
+
+  count-2
+  count-3
+
+  (* count-2 count-3))
+
+  
 
 
 (first parsed)
@@ -63,44 +112,6 @@ part-1
     )
 
   )
-
-
-
-
-(comment
-  (contains?
-   (vec
-    (vals
-     (frequencies words))) 3)
-
-  (contains? [1 2 3 4] 5)
-
-  (defn has-times [coll n]
-    (contains?
-     (vec
-      (vals
-       (frequencies coll))) n))
-
-
-  (some #{2}
-        (vals
-         (frequencies (first parsed))))
-
-
-  (has-times (first parsed) 3)
-
-  (first parsed)
-
-  (has-times (first parsed) 3)
-
-  (def count-2
-    (get-count 2))
-  (def count-3
-    (get-count 3))
-
-  count-2
-  count-3
-
-  (* count-2 count-3))
+       
 
          '()
