@@ -13,19 +13,34 @@
   (map #(Integer/parseInt %)
        (rest
         (re-matches #"#(\d+) @ (\d+),(\d+): (\d+)x(\d+)" s))))
+;; 스레드 매크로 사용 (가독성 향상)
+;; next 함수 권장, rest 성능 이슈 확인?
+;; 자바 함수 이므로 익명함수로 감싸야 한다.
 
 (defn parse-data [s]
   (let [[id x y w h] (match-data s)]
-    {:id id,
-     :x x,
-     :y y,
-     :w w,
+    {:id id
+     :x x
+     :y y
+     :w w
      :h h}))
+;; 컴마 사용 안하는 것이 기본, 한 줄인 경우에 컴마 사용
 
 (defn get-square [m]
   (for [x (range (:x m) (+ (:x m) (:w m)))
         y (range (:y m) (+ (:y m) (:h m)))]
     [x y]))
+;; keys? 
+
+(defn get-square [{x :x y :y}  m]
+  (for [x (range (:x m) (+ (:x m) (:w m)))
+        y (range (:y m) (+ (:y m) (:h m)))]
+    [x y]))
+
+(defn get-square [{:keys [x y w h]} m]
+  (for [my-x (range x (+ x w))
+        my-y (range y (+ y h))]
+    [my-x my-y]))
 
 (defn parse-claim [claim]
   (->> claim
@@ -34,36 +49,45 @@
 
 (defn part-1 []
   (->>
-   (map #(parse-claim %) (read-file))
-   (apply concat)
+   (mapcat parse-claim (read-file))
+  ;;  (apply concat)
    frequencies
    (filter (fn [[_ v]] (> v 1)))
    count))
+;; 익명 함수 안 만들어도 됨
+;; mapcat 사용 -> map - cat
 
 (part-1)
 
-(defn overlap? [ma mb]
-  (if (= (:id ma) (:id mb))
+(defn overlap? [map-a map-b]
+  (if (= (:id map-a) (:id map-b))
     false
-    (let [square-a (get-square ma)
-          square-b (get-square mb)]
+    (let [square-a (get-square map-a)
+          square-b (get-square map-b)]
       (->>
        (concat square-a square-b)
        frequencies
        (filter (fn [[_ v]] (> v 1)))
        seq
        boolean))))
+;; when-not 사용 가능, nil 반환
+;; 파라미터 이름 명확하게 작성
+;; 구현체 기준이 아니라, 추상을 기준으로 명명한다. 
+;; some 사용??
 
+;; (def not-exist-data {:id -99 :x -99 :y -99 :w -99 :h -99})
 
-(def not-exist-data {:id -99 :x -99 :y -99 :w -99 :h -99})
-
-(defn not-overlap [map-list]
+(defn not-overlap [patch-list]
   (->>
-   (for [data map-list]
-     (when (every? #(not (overlap? data %)) map-list)
+   (for [data patch-list]
+     (when (every? #(not (overlap? data %)) patch-list)
        data))
    (filter identity)
    first))
+;; O^2
+;; lazy-seq 활용
+;; 이름, 명확하게
+;; defrecord, defstruct
 
 (defn part-2 []
   (->> (map parse-data (read-file))
@@ -224,7 +248,7 @@
           (map #(parse-claim %) (read-file)))
    frequencies
    (filter (fn [[_ v]] (> v 1)))
-   count)
+   seq)
 
 
 

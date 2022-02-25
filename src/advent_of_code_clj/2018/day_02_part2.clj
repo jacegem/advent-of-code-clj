@@ -2,11 +2,13 @@
   (:require [clojure.string :as string]
             [clojure.data :refer [diff]]))
 
-
 (defn read-file []
   (->
    (slurp "resources/2018/input_02.txt")
    string/split-lines))
+
+;; pnebjqralgdgckzfifvtxywomu
+;; pnebjqsalrdgcqzfihotxhwomu
 
 (defn diff-str [a b]
   (diff (seq a) (seq b)))
@@ -20,20 +22,20 @@
 
 (defn find-common [a b]
   (apply str (last (diff-str a b))))
+;; 스레딩 매크로 사용 (이쁘면 사용)
 
 (defn part-2 []
   (let [ids (read-file)]
     (for [a ids
           b ids
-          :when  (diff-one-char? a b)]
+          :when (diff-one-char? a b)]
       (find-common a b))))
-
-(part-2)
-
-
+;; 포맷팅 확인
 
 
 (comment
+  (part-2)
+
   (defn read-file []
     (->
      (slurp "resources/2018/input_02.txt")
