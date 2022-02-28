@@ -68,32 +68,29 @@
 
 (defn asleep-time [[guard datas]]
   {:guard guard
-   :time (->>
-          (map (fn [[start end]]
-                 (- (:minute end) (:minute start))) datas)
-          (apply +))})
+   :time (->> (map (fn [[start end]]
+                     (- (:minute end) (:minute start))) datas)
+              (apply +))})
 
 ;; most asleep
 (defn most-asleep [data]
-  (->>
-   (map asleep-time data)
-   (sort-by :time)
-   reverse
-   first
-   :guard))
+  (->> (map asleep-time data)
+       (sort-by :time)
+       reverse
+       first
+       :guard))
 
 ;; most minute
 (defn most-minute [data]
-  (->>
-   (mapcat
-    (fn [[start end]]
-      (range (:minute start) (inc (:minute end))))
-    data)
-   frequencies
-   (sort-by val)
-   reverse
-   first
-   first))
+  (->> (mapcat
+        (fn [[start end]]
+          (range (:minute start) (inc (:minute end))))
+        data)
+       frequencies
+       (sort-by val)
+       reverse
+       first
+       first))
 
 (defn part-1 []
   (let [data (->> (read-file 2018 4)
