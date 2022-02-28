@@ -49,6 +49,7 @@
   (when guard-id
     (Integer/parseInt guard-id)))
 
+
 (s/fdef input->event
   :args (s/cat :input string?)
   :ret ::event)
