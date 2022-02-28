@@ -12,7 +12,7 @@
 ;; [1518-10-16 00:47] falls asleep
 ;; [1518-10-27 00:02] Guard #3181 begins shift
 ;;
-;; record
+;; record -> 일반적이름
 
 (defn read-file [year day]
   (->
@@ -24,6 +24,12 @@
   (if (nil? guard-id)
     nil
     (Integer/parseInt guard-id)))
+
+(defn parse-int-2 [guard-id]
+  (and guard-id (Integer/parseInt guard-id)))
+;; good
+
+
 
 (defn parse-record [record]
   (let [[year month day hour minute] (->> (re-seq #"\d+" record)
@@ -39,6 +45,7 @@
      :minute minute
      :id id
      :activity activity}))
+;; 정규표현식 한번에 사용
 
 (defn reduce-record [{data :data guard :guard asleep :asleep}
                      {activity :activity id :id :as record}]
@@ -49,10 +56,15 @@
             :guard id}
     :asleep {:data data
              :guard guard
-             :asleep (dissoc record :id)}
-    :wakes {:data (update data guard #(conj % [asleep (dissoc record :id)]))
+             :asleep record}
+    :wakes {:data (update data guard #(conj % [asleep record]))
             :guard guard}
     :default))
+;; record - 일반적,
+;; reduce - 일반적, => 집계한다 -> 도메인을 담아서, 경비원의 활동 기록을 원하는 데이터형태로 정리, 작업을 준비 prepare guard activity
+;; 이름이 잘 안지어지면, 함수가 선언적이지 않다. 도메인에 안 맞는 것일 수 있다.
+;; { 123 [[1 2] [3 4]] 444 [[4 5] [5 6]]}
+;; { 123 { guard-id 123, sleep [[1 2]] } }
 
 (defn asleep-time [[guard datas]]
   {:guard guard
@@ -350,7 +362,7 @@
   ; range (0~12), 
   ; loop, recur, reduce
 
-
+  (and (nil? "nil") (println "A"))
 
 ;; {:id []}
 
