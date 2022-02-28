@@ -46,8 +46,7 @@
              #(assert (= (parse-int "1") 1))
              #(assert (= (parse-int "23") 23)))}
   [guard-id]
-  (if (nil? guard-id)
-    nil
+  (when guard-id
     (Integer/parseInt guard-id)))
 
 (s/fdef input->event
