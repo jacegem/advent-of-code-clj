@@ -1,4 +1,4 @@
-(ns advent-of-code-clj.2018.day-04-v2
+(ns advent-of-code-clj.2018.day-04-v1
   (:require [clojure.spec.alpha :as s]
             [clojure.string :as string]
             [clojure.spec.test.alpha :as stest]))
@@ -6,13 +6,6 @@
 
 ;; https://adventofcode.com/2018/day/4
 ;; --- Day 4: Repose Record ---
-
-;; when-let 적용
-;; (re-find
-;;  (re-matcher #"\d+" nil))
-;; (re-find #"^\d+$" nil)
-
-;; apply max-key val 적용
 
 ;; input
 ;; [1518-11-11 00:04] Guard #2179 begins shift
@@ -56,11 +49,6 @@
   (when guard-id
     (Integer/parseInt guard-id)))
 
-(test #'parse-int)
-
-;; (defn parse-int-2 [s]
-;;   (when-let [s ((re-find #"^\d+$" s))]
-;;     (Integer/parseInt s)))
 
 (s/fdef input->event
   :args (s/cat :input string?)
@@ -93,7 +81,7 @@
 ;;   :args (s/alt :event ::event
 ;;                :guard-data ::guard-data))
 
-(defn generate-guard-sleep-event [{data :data guard :guard sleep-event :sleep-event :as acc}
+(defn generate-guard-sleep-event [{data :data guard :guard sleep-event :sleep-event}
                                   {activity :activity guard-id :guard-id :as event}]
   (case activity
     :shift {:data (if (contains? data guard-id)
@@ -104,16 +92,12 @@
              :sleep-event event
              :guard guard}
     :up {:data (update data guard #(conj % [sleep-event event]))
-         :guard guard}))
-;; keys 사용
-;; :as 사용
-;; :default 명시적으로 사용, 아니면 삭제
-;; 함수이름 -> guard-sleep-event-reducer
+         :guard guard}
+    :default))
 
 (defn sleep-range
   {:test
-   #(assert (= (sleep-range [631 [[{:year 1518, :month 2, :day 11, :hour 0, :minute 3, :guard-id nil, :activity :asleep}
-                                   {:year 1518, :month 2, :day 11, :hour 0, :minute 19, :guard-id nil, :activity :up}]]])
+   #(assert (= (sleep-range [631 [[{:year 1518, :month 2, :day 11, :hour 0, :minute 3, :guard-id nil, :activity :asleep} {:year 1518, :month 2, :day 11, :hour 0, :minute 19, :guard-id nil, :activity :up}]]])
                {:guard-id 631, :count 17, :minutes '(3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19)}))}
   [[guard-id events]]
   (let [minutes (mapcat (fn [[{start :minute} {end :minute}]]
@@ -149,19 +133,17 @@
                3))}
   [minutes]
   (->> (frequencies minutes)
-       (apply max-key val)
+       (sort-by val)
+       reverse
+       first
        first))
-;; last, max-key
-;; first 의 의미가 잘 안보임.
-
-;; (test #'get-most-minute)
-;; (get-most-minute '(1 2 3 2 3 4 3))
 
 (defn part-1 []
   (let [data (read-input)
         most-sleep (get-most-sleep data)
         most-minute (get-most-minute (:minutes most-sleep))]
     (* (:guard-id most-sleep) most-minute)))
+
 
 
 (defn get-guard-id-minute
@@ -201,12 +183,6 @@
     (test #'get-most-minute)
     (test #'get-most-sleep)
     (test #'get-guard-id-minute))
-
-    ; 단위 테스트 라이브러리 사용
-    ; clojure.test
-    ; https://clojure.github.io/clojure/clojure.test-api.html
-
-
 
   '())
 
