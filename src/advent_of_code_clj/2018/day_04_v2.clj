@@ -1,4 +1,4 @@
-(ns advent-of-code-clj.2018.day-04-v1
+(ns advent-of-code-clj.2018.day-04-v2
   (:require [clojure.spec.alpha :as s]
             [clojure.string :as string]
             [clojure.spec.test.alpha :as stest]))
