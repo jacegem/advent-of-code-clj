@@ -1,4 +1,4 @@
-(ns advent-of-code-clj.2018.day-04-v2
+(ns advent-of-code-clj.2018.day-04-v1
   (:require [clojure.spec.alpha :as s]
             [clojure.string :as string]
             [clojure.spec.test.alpha :as stest]))
@@ -48,6 +48,7 @@
   [guard-id]
   (when guard-id
     (Integer/parseInt guard-id)))
+
 
 (s/fdef input->event
   :args (s/cat :input string?)
