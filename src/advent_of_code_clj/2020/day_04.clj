@@ -11,14 +11,15 @@
    string/split-lines))
 
 (defn str->passport
-  "문자열을 passord 해쉬맵으로 변환"
+  "문자열을 passport 해쉬맵으로 변환"
   {:test
    #(do (assert (= (str->passport "iyr:2010 ecl:gry")
                    {:iyr "2010", :ecl "gry"})))}
   [str]
-  (->> (re-seq #"(\w+):(\S+)" str)
+  (->> (re-seq #"(\w+):(\w+)" str)
        (map (fn [[_ key value]] {(keyword key) value}))
        (apply merge)))
+;; (test #'str->passport)
 
 (defn valid-passport?
   " passport 유효성 확인 
@@ -64,18 +65,20 @@
     (and (>= value min) (<= value max))))
 
 (defn valid-hgt?
+  "valid cm 150 ~ 193
+   valid in 59 ~ 76"
   {:test
    #(do (assert (= (valid-hgt? "150cm") true))
         (assert (= (valid-hgt? "76in") true))
         (assert (= (valid-hgt? "140cm") false))
         (assert (= (valid-hgt? "86in") false)))}
   [str]
-  (let [[_ value unit] (re-find #"(\d+)(\w+)" str)
-        unit (keyword unit)]
+  (let [[_ value unit] (re-find #"(\d+)(\w+)" str)]
     (case unit
-      :cm (in? value 150 193)
-      :in (in? value 59 76)
+      "cm" (in? value 150 193)
+      "in" (in? value 59 76)
       false)))
+;; (test #'valid-hgt?)
 
 (defn valid-field? [[key value]]
   (case key
