@@ -49,11 +49,9 @@
         (assert (= (parse-int 45) 45)))}
   [s]
   (cond
-    (nil? s) nil
     (int? s) s
     (string? s) (when-let [str (re-matches #"\d+" s)]
                   (Integer/parseInt str))))
-
 
 (defn in?
   "min max 의 사이값인지 확인"
