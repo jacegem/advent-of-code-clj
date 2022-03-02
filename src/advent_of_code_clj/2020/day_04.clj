@@ -46,8 +46,6 @@
        (filter valid-passport?)
        count))
 
-(part-1)
-
 (defn parse-int
   {:test
    #(do (assert (= (parse-int nil) nil))
