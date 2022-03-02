@@ -9,13 +9,16 @@
       slurp
       string/split-lines))
 
+(def react-pattern
+  #"Aa|Bb|Cc|Dd|Ee|Ff|Gg|Hh|Ii|Jj|Kk|Ll|Mm|Nn|Oo|Pp|Qq|Rr|Ss|Tt|Uu|Ww|Vv|Xx|Yy|Zz|aA|bB|cC|dD|eE|fF|gG|hH|iI|jJ|kK|lL|mM|nN|oO|pP|qQ|rR|sS|tT|uU|wW|vV|xX|yY|zZ")
+;; 함수로 정규식 생성
+
 (defn react?
   "반응 여부 확인"
   {:test #(do (assert (= (react? "A") nil))
               (assert (= (react? "Aa") '("Aa"))))}
   [polymers]
-  (re-seq #"Aa|Bb|Cc|Dd|Ee|Ff|Gg|Hh|Ii|Jj|Kk|Ll|Mm|Nn|Oo|Pp|Qq|Rr|Ss|Tt|Uu|Ww|Vv|Xx|Yy|Zz|aA|bB|cC|dD|eE|fF|gG|hH|iI|jJ|kK|lL|mM|nN|oO|pP|qQ|rR|sS|tT|uU|wW|vV|xX|yY|zZ"
-          polymers))
+  (re-seq react-pattern polymers))
 ;; (test #'react?)
 
 (defn destroy
@@ -24,9 +27,7 @@
               (assert (= (destroy "AaBbC") "C"))
               (assert (= (destroy "AaBbdCcD") "dD")))}
   [polymers]
-  (string/replace polymers
-                  #"Aa|Bb|Cc|Dd|Ee|Ff|Gg|Hh|Ii|Jj|Kk|Ll|Mm|Nn|Oo|Pp|Qq|Rr|Ss|Tt|Uu|Ww|Vv|Xx|Yy|Zz|aA|bB|cC|dD|eE|fF|gG|hH|iI|jJ|kK|lL|mM|nN|oO|pP|qQ|rR|sS|tT|uU|wW|vV|xX|yY|zZ"
-                  ""))
+  (string/replace polymers react-pattern ""))
 ;; (test #'destroy)
 
 (defn react-all
@@ -39,6 +40,8 @@
       (reset! polymers (destroy @polymers)))
     @polymers))
 ;; (test #'react-all)
+;; TODO: reduce 활용
+;; 참고: https://github.com/bakyeono/study-clj-aoc/blob/main/src/aoc2018/day5.clj
 
 (defn part-1 []
   (let [input (first (read-file 2018 5))]
@@ -60,6 +63,7 @@
         input (first (read-file 2018 5))]
     (->> (map #(remove-unit-count input %) chars)
          (apply min))))
+;; remove-unit, react-all, count 작업 분할
 
 (comment
   (part-1)

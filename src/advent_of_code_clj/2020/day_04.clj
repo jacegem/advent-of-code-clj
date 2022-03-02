@@ -14,12 +14,15 @@
   "문자열을 passport 해쉬맵으로 변환"
   {:test
    #(do (assert (= (str->passport "iyr:2010 ecl:gry hcl:#6b5442")
-                   {:iyr "2010", :ecl "gry" :hcl "#6b5442"})))}
+                   {:iyr "2010" :ecl "gry" :hcl "#6b5442"})))}
   [str]
   (->> (re-seq #"(\w+):(\S+)" str)
        (map (fn [[_ key value]] {(keyword key) value}))
        (apply merge)))
 ;; (test #'str->passport)
+;; 여권 정보로 가기위한 준비단계. 에 맞는 이름 지정
+;; issue-year: int?
+;; eye-color: keyword?
 
 (defn valid-passport?
   " passport 유효성 확인 
@@ -33,8 +36,8 @@
                    false)))}
   [passport]
   (every? (set (keys passport)) [:byr :iyr :eyr :hgt :hcl :ecl :pid]))
-(test #'valid-passport?)
-(valid-passport? {:ecl "hzl", :hgt "75in", :cid "233", :pid "269157261", :iyr "2020", :byr "1973", :eyr "2029"})
+;; (test #'valid-passport?)
+;; (valid-passport? {:ecl "hzl", :hgt "75in", :cid "233", :pid "269157261", :iyr "2020", :byr "1973", :eyr "2029"})
 
 
 (defn part-1 []
@@ -43,6 +46,7 @@
        (map #(string/join " " %))
        (remove empty?)
        (map str->passport)
+       ;; 하나의 함수로 생성
        (filter valid-passport?)
        count))
 
@@ -58,6 +62,7 @@
     (int? s) s
     (string? s) (when-let [str (re-matches #"\d+" s)]
                   (Integer/parseInt str))))
+;;
 
 (defn between?
   "min max 의 사이값인지 확인"
@@ -67,7 +72,10 @@
         (assert (= (between? "3" 0 2) false)))}
   [value min max]
   (let [value (parse-int value)]
-    (and (>= value min) (<= value max))))
+    (<= min value max)))
+
+    ;; (and (>= value min) (<= value max))))
+;; 파싱을 사전에 하면 between 함수가 필요없어짐
 
 (defn valid-hgt?
   "valid cm 150 ~ 193
@@ -84,6 +92,7 @@
       "in" (between? value 59 76)
       false)))
 ;; (test #'valid-hgt?)
+;; 값과 단위나 나눠서져 해쉬맵으로 가지고 있도록.
 
 (defn valid-field?
   {:test
@@ -118,6 +127,8 @@
        (filter valid-passport?)
        (filter #(every? valid-field? %))
        count))
+;; PPAP 구분
+;; 파싱을 끝까지 처리
 
 (comment
   (part-1)
