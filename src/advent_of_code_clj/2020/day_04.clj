@@ -13,24 +13,29 @@
 (defn str->passport
   "문자열을 passport 해쉬맵으로 변환"
   {:test
-   #(do (assert (= (str->passport "iyr:2010 ecl:gry")
-                   {:iyr "2010", :ecl "gry"})))}
+   #(do (assert (= (str->passport "iyr:2010 ecl:gry hcl:#6b5442")
+                   {:iyr "2010", :ecl "gry" :hcl "#6b5442"})))}
   [str]
-  (->> (re-seq #"(\w+):(\w+)" str)
+  (->> (re-seq #"(\w+):(\S+)" str)
        (map (fn [[_ key value]] {(keyword key) value}))
        (apply merge)))
 ;; (test #'str->passport)
 
 (defn valid-passport?
   " passport 유효성 확인 
-    #{:byr :iyr :eyr :hgt :hcl :ecl :pid} 모두 있으면 Valid "
+    [:byr :iyr :eyr :hgt :hcl :ecl :pid] 모두 있으면 Valid "
   {:test
    #(do (assert (= (valid-passport? {:byr 1 :iyr 2 :eyr 3 :hgt 4 :hcl 5 :ecl 6 :pid 7})
                    true))
         (assert (= (valid-passport? {:byr 1 :iyr 2 :eyr 3 :hgt 4 :hcl 5 :ecl 6})
+                   false))
+        (assert (= (valid-passport? {:byr 1 :iyr 2 :eyr 3 :hgt 4 :ecl 6 :pid 7})
                    false)))}
   [passport]
-  (every? (set (keys passport)) #{:byr :iyr :eyr :hgt :hcl :ecl :pid}))
+  (every? (set (keys passport)) [:byr :iyr :eyr :hgt :hcl :ecl :pid]))
+(test #'valid-passport?)
+(valid-passport? {:ecl "hzl", :hgt "75in", :cid "233", :pid "269157261", :iyr "2020", :byr "1973", :eyr "2029"})
+
 
 (defn part-1 []
   (->> (read-file 2020 4)
@@ -40,6 +45,8 @@
        (map str->passport)
        (filter valid-passport?)
        count))
+
+(part-1)
 
 (defn parse-int
   {:test
@@ -80,17 +87,29 @@
       false)))
 ;; (test #'valid-hgt?)
 
-(defn valid-field? [[key value]]
+(defn valid-field?
+  {:test
+   #(do
+      (assert (= (valid-field? [:byr "1920"]) true))
+      (assert (= (valid-field? [:iyr "2020"]) true))
+      (assert (= (valid-field? [:eyr "2022"]) true))
+      (assert (= (valid-field? [:hgt "150cm"]) true))
+      (assert (= (valid-field? [:hcl "#602927"]) "#602927"))
+      (assert (= (valid-field? [:ecl "hzl"]) "hzl"))
+      (assert (= (valid-field? [:pid "123456789"]) "123456789"))
+      (assert (= (valid-field? [:cid nil]) true)))}
+  [[key value]]
   (case key
     :byr (in? value 1920 2002)
     :iyr (in? value 2010 2020)
     :eyr (in? value 2020 2030)
     :hgt (valid-hgt? value)
-    :hcl (re-matches #"^#[\da-f]{6}$" value)
+    :hcl (re-matches #"#[\da-f]{6}" value)
     :ecl (#{"amb" "blu" "brn" "gry" "grn" "hzl" "oth"} value)
-    :pid (re-matches #"^\d{9}$" value)
+    :pid (re-matches #"\d{9}" value)
     :cid true
     false))
+;; (test #'valid-field?)
 
 (defn part-2 []
   (->> (read-file 2020 4)
@@ -111,6 +130,7 @@
   (test #'parse-int)
   (test #'in?)
   (test #'valid-hgt?)
+  (test #'valid-field?)
 
   '())
 
