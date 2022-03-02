@@ -41,7 +41,7 @@
   (->> (read-file 2020 4)
        (partition-by empty?)
        (map #(string/join " " %))
-       (remove string/blank?)
+       (remove empty?)
        (map str->passport)
        (filter valid-passport?)
        count))
@@ -59,12 +59,12 @@
     (string? s) (when-let [str (re-matches #"\d+" s)]
                   (Integer/parseInt str))))
 
-(defn in?
+(defn between?
   "min max 의 사이값인지 확인"
   {:test
-   #(do (assert (= (in? "1" 0 2) true))
-        (assert (= (in? 2 0 2) true))
-        (assert (= (in? "3" 0 2) false)))}
+   #(do (assert (= (between? "1" 0 2) true))
+        (assert (= (between? 2 0 2) true))
+        (assert (= (between? "3" 0 2) false)))}
   [value min max]
   (let [value (parse-int value)]
     (and (>= value min) (<= value max))))
@@ -80,8 +80,8 @@
   [str]
   (let [[_ value unit] (re-find #"(\d+)(\w+)" str)]
     (case unit
-      "cm" (in? value 150 193)
-      "in" (in? value 59 76)
+      "cm" (between? value 150 193)
+      "in" (between? value 59 76)
       false)))
 ;; (test #'valid-hgt?)
 
@@ -98,9 +98,9 @@
       (assert (= (valid-field? [:cid nil]) true)))}
   [[key value]]
   (case key
-    :byr (in? value 1920 2002)
-    :iyr (in? value 2010 2020)
-    :eyr (in? value 2020 2030)
+    :byr (between? value 1920 2002)
+    :iyr (between? value 2010 2020)
+    :eyr (between? value 2020 2030)
     :hgt (valid-hgt? value)
     :hcl (re-matches #"#[\da-f]{6}" value)
     :ecl (#{"amb" "blu" "brn" "gry" "grn" "hzl" "oth"} value)
@@ -113,7 +113,7 @@
   (->> (read-file 2020 4)
        (partition-by empty?)
        (map #(string/join " " %))
-       (remove string/blank?)
+       (remove empty?)
        (map str->passport)
        (filter valid-passport?)
        (filter #(every? valid-field? %))
@@ -126,7 +126,7 @@
   (test #'str->passport)
   (test #'valid-passport?)
   (test #'parse-int)
-  (test #'in?)
+  (test #'between?)
   (test #'valid-hgt?)
   (test #'valid-field?)
 
