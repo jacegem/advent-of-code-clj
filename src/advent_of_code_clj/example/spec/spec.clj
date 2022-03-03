@@ -1,4 +1,4 @@
-(ns advent-of-code-clj.example.spec
+(ns advent-of-code-clj.example.spec.spec
   (:require [clojure.spec.alpha :as s]
             [failjure.core :as f]
             [clojure.spec.test.alpha :as stest]))
