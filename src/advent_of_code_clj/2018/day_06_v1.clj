@@ -16,6 +16,9 @@
   (let [[x y] (->> (re-seq #"\d+" s)
                    (map #(Integer/parseInt %)))]
     {:x x :y y}))
+;; str->coordinate
+;; 문제에서 주어진 좌표 -> xxx-coord 
+;; 모든 좌표 -> yyy-coord
 
 (defn manhattan-distance
   "manhatann 거리"
@@ -91,22 +94,24 @@
       (when coord-point
         (assoc coord-point :boundary (boundary? coord boundary))))))
 ;; (test #'coord->point)
+;; 이름을 직관적으로 변경 
 
 (defn part-1 []
   (let [points (->> (read-file 2018 6)
                     (map coordinate))
         boundary (points->boundary points)
-        all-coord-point (coord->point boundary points)
-        boundary-points (->> (filter #(:boundary %) all-coord-point)
+        coord-point-list (coord->point boundary points)
+        boundary-points (->> (filter #(:boundary %) coord-point-list)
                              (group-by :point)
                              keys)]
-    (->> all-coord-point
+    (->> coord-point-list
          (remove (fn [coord-point]
                    ((set boundary-points) (:point coord-point))))
          (map :point)
          frequencies
          (sort-by val >)
          first)))
+;; 
 
 (defn coord-distance-sum
   "각 좌표에서 각 포인트까지의 거리의 합"
@@ -119,8 +124,7 @@
     (let [coord {:x x :y y}]
       (->> (map #(manhattan-distance coord %) points)
            (apply +)))))
-
-(coord-distance-sum {:x-min 0 :x-max 4 :y-min 0 :y-max 4} '({:x 1 :y 2} {:x 3 :y 4}))
+;; (coord-distance-sum {:x-min 0 :x-max 4 :y-min 0 :y-max 4} '({:x 1 :y 2} {:x 3 :y 4}))
 
 (defn part-2 []
   (let [points (->> (read-file 2018 6)
