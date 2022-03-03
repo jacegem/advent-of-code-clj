@@ -27,8 +27,8 @@
 
 (defn points->boundary
   "경계값 반환"
-  {:test #(do (assert (= (points->boundary '({:x 1 :y 2}))
-                         {:x-min 1, :x-max 1, :y-min 2, :y-max 2})))}
+  {:test #(do (assert (= (points->boundary '({:x 1 :y 2} {:x 3 :y 4}))
+                         {:x-min 1, :x-max 3, :y-min 2, :y-max 4})))}
   [coords]
   (let [xs (map :x coords)
         ys (map :y coords)
@@ -37,7 +37,7 @@
         y-min (apply min ys)
         y-max (apply max ys)]
     {:x-min x-min, :x-max x-max, :y-min y-min, :y-max y-max}))
-
+;; (test #'points->boundary)
 
 (defn closest-point
   "가장 가까운 포인트 찾기"
