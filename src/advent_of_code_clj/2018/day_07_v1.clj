@@ -136,22 +136,22 @@
                     {:prev-req-steps (:C), :step :F}
                     {:prev-req-steps (:B :D :F), :step :E}))
 
-(assign-to-workers {:done-steps []
-                    :remain-steps remain-steps
-                    :current-time 0
-                    :workers (create-workers 5)} 1)
+;; (assign-to-workers {:done-steps []
+;;                     :remain-steps remain-steps
+;;                     :current-time 0
+;;                     :workers (create-workers 5)} 1)
 
-(empty? '())
+;; (empty? '())
 
-(assign-to-workers {:done-steps [:C :A :B :D :F :A :B :E :C]
-                    :remain-steps ()
-                    :current-time 63
-                    :workers {0 {:worker-id 0, :step nil, :complete-time nil},
-                              1 {:worker-id 1, :step :E, :complete-time 127},
-                              2 {:worker-id 2, :step nil, :complete-time nil},
-                              3 {:worker-id 3, :step :D, :complete-time 64},
-                              4 {:worker-id 4, :step :F, :complete-time 66}}}
-                   '(0 2))
+;; (assign-to-workers {:done-steps [:C :A :B :D :F :A :B :E :C]
+;;                     :remain-steps ()
+;;                     :current-time 63
+;;                     :workers {0 {:worker-id 0, :step nil, :complete-time nil},
+;;                               1 {:worker-id 1, :step :E, :complete-time 127},
+;;                               2 {:worker-id 2, :step nil, :complete-time nil},
+;;                               3 {:worker-id 3, :step :D, :complete-time 64},
+;;                               4 {:worker-id 4, :step :F, :complete-time 66}}}
+;;                    '(0 2))
 
 
 ;; (defn complete-steps
@@ -266,8 +266,22 @@
                                               :remain-steps remain-steps
                                               :workers (create-workers 5)
                                               :current-time 0})
-     (take 128)
+
+     (take 129)
      last)
+
+(def steps (find-steps (-> (read-file 2018 7 :type :sampel)
+                           extract-instructions)))
+
+(->> (iterate exec-instructions-with-workers {:done-steps []
+                                              :remain-steps remain-steps
+                                              :workers (create-workers 5)
+                                              :current-time 0})
+
+     (take-while (fn [{:keys [done-steps]}]
+                   (< (count done-steps) (count steps))))
+     last)
+
 
     ;;  (drop-while #(-> (:remain-steps %)
     ;;                   seq))
