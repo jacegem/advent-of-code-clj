@@ -49,10 +49,10 @@
             steps)))
 ;; (test #'create-steps-with-prev-reqs)
 
-(defn done-available-step?
-  {:test #(do (assert (= (done-available-step? [:C] {:prev-req-steps '(:C), :step :A})
+(defn startable-step?
+  {:test #(do (assert (= (startable-step? [:C] {:prev-req-steps '(:C), :step :A})
                          true))
-              (assert (= (done-available-step? [:C] {:prev-req-steps '(:A), :step :D})
+              (assert (= (startable-step? [:C] {:prev-req-steps '(:A), :step :D})
                          false)))}
   [done-steps step-with-prev-reqs]
   (every? #((set done-steps) %) (:prev-req-steps step-with-prev-reqs)))
@@ -60,7 +60,7 @@
 
 
 (defn find-next-step [done-steps remain-steps]
-  (->> (filter #(done-available-step? done-steps %) remain-steps)
+  (->> (filter #(startable-step? done-steps %) remain-steps)
        (map :step)
        sort  ;; 알파벳 순으로 정렬
        first ;; 첫번째 값
@@ -89,7 +89,7 @@
          (map name)
          (apply str))))
 
-;; (part-1)
+(part-1)
 
 (defn create-workers [n]
   (reduce (fn [workers worker-id]
@@ -106,9 +106,10 @@
       first
       int
       (- 4)
-      (+ current-time)))
+      (+ current-time)
+      ))
 ;; (test #'calc-complete-time)
-;; (calc-complete-time 1 :A)
+(calc-complete-time 0 :A)
 
 (defn assign-to-workers [{:keys [done-steps remain-steps current-time workers]} worker-id]
   (if (empty? remain-steps)
@@ -136,43 +137,7 @@
                     {:prev-req-steps (:C), :step :F}
                     {:prev-req-steps (:B :D :F), :step :E}))
 
-;; (assign-to-workers {:done-steps []
-;;                     :remain-steps remain-steps
-;;                     :current-time 0
-;;                     :workers (create-workers 5)} 1)
 
-;; (empty? '())
-
-;; (assign-to-workers {:done-steps [:C :A :B :D :F :A :B :E :C]
-;;                     :remain-steps ()
-;;                     :current-time 63
-;;                     :workers {0 {:worker-id 0, :step nil, :complete-time nil},
-;;                               1 {:worker-id 1, :step :E, :complete-time 127},
-;;                               2 {:worker-id 2, :step nil, :complete-time nil},
-;;                               3 {:worker-id 3, :step :D, :complete-time 64},
-;;                               4 {:worker-id 4, :step :F, :complete-time 66}}}
-;;                    '(0 2))
-
-
-;; (defn complete-steps
-;;   "complete-time 을 확인하여 step 을 완료"
-;;   [current-time workers]
-;;   (->>
-;;    (map (fn [[worker-id {:keys [complete-time] :as worker}]]
-;;           (if (= complete-time current-time)
-;;             (-> worker
-;;                 (assoc :step nil))))
-
-;;         workers)
-;;    (into {})))
-
-
-;; (mapv (fn [[k v]] {k v}) {1 :A 2 :B})
-
-;; (->>
-;;  (map (fn [[k v]] [k v]) {1 :A 2 :B})
-;;  (into {}))
-;; (hash-map {1 :A} {2 :B})
 
 (defn find-complete-steps
   {:test
@@ -217,10 +182,6 @@
         updated-workers (update-workers completed-steps workers)
         idle-ids (->> (filter (fn [[_ worker]] (nil? (:step worker))) workers)
                       keys)]
-    ;; (println "updated-done-steps" updated-done-steps)
-    ;; (println "remain-steps" remain-steps)
-    ;; (println "current-time" current-time)
-    ;; (println "updated-workers" updated-workers)
     (-> (reduce assign-to-workers {:done-steps updated-done-steps
                                    :remain-steps remain-steps
                                    :current-time current-time
@@ -273,14 +234,36 @@
 (def steps (find-steps (-> (read-file 2018 7 :type :sampel)
                            extract-instructions)))
 
-(->> (iterate exec-instructions-with-workers {:done-steps []
+(defn all-workers-are-idle? [{:keys [workers remain-steps]}]  
+  (->> workers
+       (every? (fn [[_ worker]] (nil? (:step worker))))))
+
+(all-workers-are-idle? {:done-steps [:C :A :B :D :F :A :B :E :C :D :F :E],
+                         :remain-steps (),
+                         :current-time 128,
+                         :workers
+                         {0 {:worker-id 0, :step nil, :complete-time nil},
+                          1 {:worker-id 1, :step nil, :complete-time nil},
+                          2 {:worker-id 2, :step nil, :complete-time nil},
+                          3 {:worker-id 3, :step nil, :complete-time nil},
+                          4 {:worker-id 4, :step nil, :complete-time nil}}})
+
+(exec-instructions-with-workers {:done-steps []
                                               :remain-steps remain-steps
                                               :workers (create-workers 5)
                                               :current-time 0})
 
-     (take-while (fn [{:keys [done-steps]}]
-                   (< (count done-steps) (count steps))))
-     last)
+(empty? '())
+
+(->> (iterate exec-instructions-with-workers {:done-steps []
+                                              :remain-steps remain-steps
+                                              :workers (create-workers 5)
+                                              :current-time 0})
+    ;; 모든 worker step 이 nil 일 때까지
+    ;;  
+     (filter #(empty? (:remain-steps %)))
+     (filter all-workers-are-idle?)
+     first)
 
 
     ;;  (drop-while #(-> (:remain-steps %)
@@ -289,7 +272,23 @@
 
 
 
-(+ 1 1)
+(defn part-2 []
+  (let [instructions (-> (read-file 2018 7)
+                         extract-instructions)
+        steps (find-steps instructions)
+        steps-with-prev-reqs (create-steps-with-prev-reqs steps instructions)]
+    
+    (->> (iterate exec-instructions-with-workers {:done-steps []
+                                                  :remain-steps steps-with-prev-reqs
+                                                  :workers (create-workers 5)
+                                                  :current-time 0})
+         (filter #(empty? (:remain-steps %)))
+         (filter all-workers-are-idle?)
+         first
+         )))
+
+
+(part-2)
 
 
 
@@ -327,3 +326,40 @@
 
 
 ;; (def workers (create-workers 5))
+;; (assign-to-workers {:done-steps []
+;;                     :remain-steps remain-steps
+;;                     :current-time 0
+;;                     :workers (create-workers 5)} 1)
+
+;; (empty? '())
+
+;; (assign-to-workers {:done-steps [:C :A :B :D :F :A :B :E :C]
+;;                     :remain-steps ()
+;;                     :current-time 63
+;;                     :workers {0 {:worker-id 0, :step nil, :complete-time nil},
+;;                               1 {:worker-id 1, :step :E, :complete-time 127},
+;;                               2 {:worker-id 2, :step nil, :complete-time nil},
+;;                               3 {:worker-id 3, :step :D, :complete-time 64},
+;;                               4 {:worker-id 4, :step :F, :complete-time 66}}}
+;;                    '(0 2))
+
+
+;; (defn complete-steps
+;;   "complete-time 을 확인하여 step 을 완료"
+;;   [current-time workers]
+;;   (->>
+;;    (map (fn [[worker-id {:keys [complete-time] :as worker}]]
+;;           (if (= complete-time current-time)
+;;             (-> worker
+;;                 (assoc :step nil))))
+
+;;         workers)
+;;    (into {})))
+
+
+;; (mapv (fn [[k v]] {k v}) {1 :A 2 :B})
+
+;; (->>
+;;  (map (fn [[k v]] [k v]) {1 :A 2 :B})
+;;  (into {}))
+;; (hash-map {1 :A} {2 :B})
