@@ -13,14 +13,15 @@
         string/split-lines)))
 
 (defn parse-instructions []
-  (->>
-   (map-indexed (fn [idx line]
-                  (let [[_ op value] (re-matches #"(\w+) ([+-]\d+)" line)]
-                    {idx {:id idx :op (keyword op) :value (Integer/parseInt value)}}))
-                (read-file 2020 8 :type :sample))
-   (into {})))
+  (->> (map-indexed (fn [idx line]
+                      (let [[_ op value] (re-matches #"(\w+) ([+-]\d+)" line)]
+                        {idx {:id idx :op (keyword op) :value (Integer/parseInt value)}}))
+                    (read-file 2020 8))
+       (into {})))
 
-(defn run-instruction [{:keys [acc op value index] :as param}]
+(defn run-instruction
+  " 각 op 에 따라 값을 업데이트 한다. "
+  [{:keys [acc op value index] :as param}]
   (case op
     :nop (assoc param :index (inc index))
     :acc (-> param
@@ -28,7 +29,9 @@
              (assoc :index (inc index)))
     :jmp (assoc param :index (+ index value))))
 
-(defn visit [{:keys [index instructions visited-indexes acc] :as visit-state}]
+(defn visit
+  "이전에 방문한 op 인지 확인"
+  [{:keys [index instructions visited-indexes acc] :as visit-state}]
   (if (.contains visited-indexes index)
     {:acc acc, :loop? true}
     (let [visited-indexes (conj visited-indexes index)
@@ -49,7 +52,7 @@
          (filter #(= true (:loop? %)))
          first)))
 
-(defn visit-to-last [{:keys [index instructions visited-indexes acc] :as visit-state}]
+(defn visit-until-last [{:keys [index instructions visited-indexes acc] :as visit-state}]
   (cond
     (= (count instructions) index) (assoc visit-state :terminated? true)
     (.contains visited-indexes index) (assoc visit-state :loop? true)
@@ -62,59 +65,46 @@
                 (assoc :visited-indexes visited-indexes)))))
 
 
-
-
-
-
 (defn change-instruction [{:keys [id op]} instructions]
   (case op
     :nop (assoc-in instructions [id :op] :jmp)
     :jmp (assoc-in instructions [id :op] :nop)
     nil))
 
-(def instructions (parse-instructions))
-(def ins (change-instruction (get instructions 7) instructions))
-
 
 (defn find-normally-terminated-acc [{:keys [initial-instructions] :as initial-state}
-                                    target-instruction]
+                                    [_ target-instruction]]
   (if-let [updated-instructions (change-instruction  target-instruction initial-instructions)]
-    (let [result (->> (iterate visit-to-last {:index 0
-                                              :instructions updated-instructions
-                                              :visited-indexes []
-                                              :acc 0})
+    (let [result (->> (iterate visit-until-last {:index 0
+                                                 :instructions updated-instructions
+                                                 :visited-indexes []
+                                                 :acc 0})
                       (filter #(or (:loop? %) (:terminated? %)))
                       first)]
       (if (:terminated? result)
-        (reduced (assoc initial-state :result result))      
+        (reduced (assoc initial-state :result result))
         initial-state))
     initial-state))
-
-
-(let [result (->> (iterate visit-to-last {:index 0
-                                          :instructions ins
-                                          :visited-indexes []
-                                          :acc 0})
-                  (filter #(or (:loop? %) (:terminated? %)))
-                  first)]
-  (if (:terminated? result)
-    (reduced (assoc {} :result result))
-    :AGAIN))
-
-
 
 (defn fix [instructions]
   (reduce find-normally-terminated-acc {:initial-instructions instructions}
           instructions))
 
-
-(fix (parse-instructions))
-
-
-
-(reduce find-normally-terminated-acc instructions instructions)
+(defn part-2 []
+  (let [instructions (parse-instructions)]
+    (fix instructions)))
 
 
+(comment
+  (part-1)
+  (part-2)
+  '())
+
+
+
+;; (def instructions (parse-instructions))
+;; (def ins (change-instruction (nth instructions 7) instructions))
+;; (reduce find-normally-terminated-acc instructions instructions)
 ;; (def instructions
 ;;   (parse-instructions))
 ;; instructions
