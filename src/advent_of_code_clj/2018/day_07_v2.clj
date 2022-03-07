@@ -1,6 +1,6 @@
 (ns advent-of-code-clj.2018.day-07-v2
-  (:require [clojure.string :as string]
-            [clojure.set :refer [union]]))
+  (:require [clojure.set :refer [union]]
+            [clojure.string :as string]))
 
 (defn read-file [year day & {:keys [type] :as opts}]
   (let [filepath (if (= type :sample)
@@ -58,16 +58,6 @@
             steps)))
 
 
-"
-1. 완료된 step 을 찾는다
-[done-steps workers] (update-complete-steps current-time workers)
- 
-2. workers에서 작업 할당
-[remain-steps workers] (assign-to-workers current-time remain-steps workers)
-  2-1. 시작할 수 있는 step을 찾는다.
-  (find-startable-steps remain-steps done-steps)
-"
-
 (defn find-completed-work
   "완료된 작업을 찾는다"
   {:test #(do (assert (= (find-completed-work 1 {1 {:id 1 :step :A :complete-time 1}
@@ -114,8 +104,8 @@
                          true))
               (assert (= (startable-step? [:C] {:prev-req-steps '(:A), :step :D})
                          false)))}
-  [done-steps step-with-prev-reqs]
-  (every? #((set done-steps) %) (:prev-req-steps step-with-prev-reqs)))
+  [done-steps remain-step]
+  (every? #((set done-steps) %) (:prev-req-steps remain-step)))
 ;; (test #'startable-step?)
 
 (defn find-startable-steps [done-steps remain-steps]
@@ -124,25 +114,11 @@
        sort  ;; 알파벳 순으로 정렬
        ))
 
-(defn assignable?
-  "step 할당이 가능한지 여부 확인"
-  {:test #(do (assert (= (assignable? [:A :B] {0 {:step nil, :complete-time nil},
-                                               1 {:step :C, :complete-time 0}})
-                         true)))}
-  [startable-steps workers]
-  (if (and (not-empty startable-steps)
-           (some (fn [[_ worker]] (= (:step worker) nil)) workers))
-    true
-    false))
-;; (test #'assignable?)
-
-
 (defn create-workers [n]
   (reduce (fn [workers worker-id]
             (assoc workers worker-id {:worker-id worker-id
                                       :step nil
                                       :complete-time nil})) {} (range n)))
-
 
 (defn calc-complete-time
   {:test #(do (assert (= (calc-complete-time 1 :A)
@@ -183,12 +159,6 @@
               :done-steps done-steps
               :remain-steps remain-steps})))
 
-;; (when-not (= workers updated-workers)
-;;   (map (fn [[_ v]] (when (:step v) (print (:step v) (:complete-time v)))) updated-workers))
-;; (map (fn [[_ v]] (when (:step v) (print (:step v) (:complete-time v)))) {0 {:worker-id 0, :step :A, :complete-time 62},
-                                                                        ;;  1 {:worker-id 1, :step nil, :complete-time nil}})
-;; (test #'assign-to-worker)
-
 
 (defn assign-to-workers
   [{:keys [time done-steps remain-steps workers]}]
@@ -202,45 +172,46 @@
             startable-steps)))
 
 
-(def steps
-  (let [instructions (-> (read-file 2018 7)
-                         str->instructions)
-        steps (find-steps instructions)
-        steps-with-prev-reqs (create-steps-with-prev-reqs steps instructions)]
-    steps-with-prev-reqs))
-
-(assign-to-workers {:current-time 1
-                    :done-steps []
-                    :remain-steps steps
-                    :workers (create-workers 3)})
-
-
-(defn all-workers-are-idle? [{:keys [workers remain-steps]}]
+(defn all-workers-are-idle? [{:keys [workers]}]
   (->> workers
        (every? (fn [[_ worker]] (nil? (:step worker))))))
 
-(let [instructions (-> (read-file 2018 7)
-                       str->instructions)
-      steps (find-steps instructions)
-      steps-with-prev-reqs (create-steps-with-prev-reqs steps instructions)
-      time -1
-      done-steps []
-      workers (create-workers 5)]
-  (->> (iterate assign-to-workers {:time time
-                                   :done-steps done-steps
-                                   :remain-steps steps-with-prev-reqs
-                                   :workers workers})
-       (filter #(empty? (:remain-steps %)))
-       (filter all-workers-are-idle?)
-       first
-      ;;  (take 209)
-      ;;  (take-last 2)
-      ;;  last
-  ;;  (take 900)
-  ;;  (take-last 2)
-       ))
+
+(defn part-2 [& {:keys [worker-count] :or {worker-count 5} :as opts}]
+  (let [instructions (-> (read-file 2018 7)
+                         str->instructions)
+        steps (find-steps instructions)
+        steps-with-prev-reqs (create-steps-with-prev-reqs steps instructions)
+        time -1
+        done-steps []
+        workers (create-workers worker-count)]
+    (->> (iterate assign-to-workers {:time time
+                                     :done-steps done-steps
+                                     :remain-steps steps-with-prev-reqs
+                                     :workers workers})
+         (filter #(empty? (:remain-steps %)))
+         (filter all-workers-are-idle?)
+         first)))
 
 
+(comment
+  (part-2)
+  '())
+
+
+;; (def steps
+;;   (let [instructions (-> (read-file 2018 7)
+;;                          str->instructions)
+;;         steps (find-steps instructions)
+;;         steps-with-prev-reqs (create-steps-with-prev-reqs steps instructions)]
+;;     steps-with-prev-reqs))
+
+
+
+;; (assign-to-workers {:current-time 1
+;;                     :done-steps []
+;;                     :remain-steps steps
+;;                     :workers (create-workers 3)})
 
 ;; (defn exec-instructions-with-workers
 ;;   [{:keys [current-time done-steps steps workers]}]
@@ -251,27 +222,23 @@
 ;;                                :workers workers})
 ;;    (take 5)))
 
+;; (when-not (= workers updated-workers)
+;;   (map (fn [[_ v]] (when (:step v) (print (:step v) (:complete-time v)))) updated-workers))
+;; (map (fn [[_ v]] (when (:step v) (print (:step v) (:complete-time v)))) {0 {:worker-id 0, :step :A, :complete-time 62},
+                                                                        ;;  1 {:worker-id 1, :step nil, :complete-time nil}})
+;; (test #'assign-to-worker)
 
 
-
-
-
-
-
-
-
-
-
-(def steps
-  (let [instructions (-> (read-file 2018 7)
-                         str->instructions)
-        steps (find-steps instructions)
-        steps-with-prev-reqs (create-steps-with-prev-reqs steps instructions)]
-    steps-with-prev-reqs))
-(->> (read-file 2018 7)
-     first
-     (re-seq #"\b[A-Z]\b")
-     (map keyword))
+;; (def steps
+;;   (let [instructions (-> (read-file 2018 7)
+;;                          str->instructions)
+;;         steps (find-steps instructions)
+;;         steps-with-prev-reqs (create-steps-with-prev-reqs steps instructions)]
+;;     steps-with-prev-reqs))
+;; (->> (read-file 2018 7)
+;;      first
+;;      (re-seq #"\b[A-Z]\b")
+;;      (map keyword))
 
 
 
