@@ -1,16 +1,30 @@
 (ns advent-of-code-clj.2020.day-08
-  (:require [clojure.string :as string]))
+  (:require [clojure.string :as string]
+            [clojure.spec.alpha :as s]
+
+            [clojure.spec.test.alpha :as stest]))
 
 ;; --- Day 8: Handheld Halting ---
 ;; https://adventofcode.com/2020/day/8
 
 
-(defn read-file [year day & {:keys [type] :as opts}]
+
+(s/fdef read-file
+  :args (s/cat :year int?
+               :day int?))
+
+(defn read-file [year day & {:keys [type]}]
   (let [filepath (if (= type :sample)
                    (format "resources/%d/input_%02d_sample.txt" year day)
                    (format "resources/%d/input_%02d.txt" year day))]
     (-> (slurp filepath)
         string/split-lines)))
+
+(stest/instrument `read-file)
+
+
+;; (s/fdef parse-instructions
+;;   :ret (s/keys :req-un [string?]))
 
 (defn parse-instructions []
   (->> (map-indexed (fn [idx line]
@@ -18,9 +32,12 @@
                         {idx {:id idx :op (keyword op) :value (Integer/parseInt value)}}))
                     (read-file 2020 8))
        (into {})))
+;; (stest/instrument `parse-instructions)
+;; (parse-instructions)
+
 
 (defn run-instruction
-  " 각 op 에 따라 값을 업데이트 한다. "
+  "각 op 에 따라 값을 업데이트"
   [{:keys [acc op value index] :as param}]
   (case op
     :nop (assoc param :index (inc index))
@@ -98,6 +115,8 @@
 (comment
   (part-1)
   (part-2)
+
+  (into)
   '())
 
 
