@@ -9,9 +9,9 @@
         string/split-lines)))
 ;; (read-file 2018 6)
 
-(defn coordinate-str
+(defn str->coordinate
   "좌표 정보로 변경"
-  {:test #(do (assert (= (coordinate-str "44, 132")
+  {:test #(do (assert (= (str->coordinate "44, 132")
                          {:x 44 :y 132})))}
   [s]
   (let [[x y] (->> (re-seq #"\d+" s)
@@ -22,8 +22,8 @@
 ;; input : 입력
 ;; coord : 좌표
 ;; input-coord : 문제에서 주어진 좌표
-;; grid-coord : 각각의 좌표
-;; closest-coord : 가장 가까운 입력 좌표
+;; grid-coord : 각각의 좌표, -> 고유한 특징이 나타나도록
+;; closest-input-coord : 가장 가까운 입력 좌표
 
 (defn calc-manhattan-distance
   "manhatann 거리"
@@ -49,17 +49,17 @@
 ;; (test #'extract-boundary)
 ;; extract-boundary
 
-(defn find-closest-input-point
+(defn find-closest-input-coord
   "가장 가까운 포인트 찾기"
   {:test
-   #(do (assert (= (find-closest-input-point {:x 1 :y 2} '({:x 1 :y 1} {:x 2 :y 3}))
+   #(do (assert (= (find-closest-input-coord {:x 1 :y 2} '({:x 1 :y 1} {:x 2 :y 3}))
                    {:grid-coord {:x 1, :y 2}, :input-coord {:x 1, :y 1}, :distance 1, :closest-input-coord {:x 1, :y 1}})))}
-  [grid-coord input-coord]
+  [grid-coord input-coords]
   (let [grid-with-distances (map (fn [input]
                                    {:grid-coord grid-coord
                                     :input-coord input
                                     :distance (calc-manhattan-distance grid-coord input)})
-                                 input-coord)
+                                 input-coords)
         min-distance (->> (map :distance grid-with-distances)
                           (apply min))
         min-distance-input-coords (filter (fn [grid-input-distance]
@@ -68,7 +68,7 @@
     (when (= (count min-distance-input-coords) 1)
       (let [grid-with-input (first min-distance-input-coords)]
         (assoc grid-with-input :closest-input-coord (:input-coord grid-with-input))))))
-(find-closest-input-point {:x 1 :y 2} '({:x 1 :y 1} {:x 2 :y 3}))
+(find-closest-input-coord {:x 1 :y 2} '({:x 1 :y 1} {:x 2 :y 3}))
 ;; find-closest-input-point
 
 (defn boundary?
@@ -83,11 +83,11 @@
       (= y y-max)))
 ;; (test #'boundary?)
 
-(defn find-each-closest-input-point
+(defn find-each-closest-input-coord
   "각 좌표에서 가장 가까운 포인트와 거리
    같은 거리에 2개 이상의 포인트가 있는 경우 -> nil"
   {:test
-   #(do (assert (= (find-each-closest-input-point {:x-min 0 :x-max 2 :y-min 0 :y-max 2} '({:x 1 :y 1} {:x 2 :y 2}))
+   #(do (assert (= (find-each-closest-input-coord {:x-min 0 :x-max 2 :y-min 0 :y-max 2} '({:x 1 :y 1} {:x 2 :y 2}))
                    '({:grid-coord {:x 0, :y 0}, :input-coord {:x 1, :y 1}, :distance 2, :closest-input-coord {:x 1, :y 1}, :boundary true}
                      {:grid-coord {:x 0, :y 1}, :input-coord {:x 1, :y 1}, :distance 1, :closest-input-coord {:x 1, :y 1}, :boundary true}
                      nil
@@ -101,7 +101,7 @@
   (for [x (range x-min (inc x-max))
         y (range y-min (inc y-max))]
     (let [grid-coord {:x x :y y}
-          grid-closest-input-coord (find-closest-input-point grid-coord input-coords)]
+          grid-closest-input-coord (find-closest-input-coord grid-coord input-coords)]
       (when grid-closest-input-coord
         (assoc grid-closest-input-coord :boundary (boundary? grid-coord boundary))))))
 ;; (test #'find-each-closest-input-point)
@@ -111,9 +111,9 @@
 
 (defn part-1 []
   (let [input-coords (->> (read-file 2018 6)
-                          (map coordinate-str))
+                          (map str->coordinate))
         boundary (extract-boundary input-coords)
-        each-grid-with-closest (find-each-closest-input-point boundary input-coords)
+        each-grid-with-closest (find-each-closest-input-coord boundary input-coords)
         boundary-input-coords (->> (filter #(:boundary %) each-grid-with-closest)
                                    (group-by :closest-input-coord)
                                    keys)]
@@ -142,7 +142,7 @@
 
 (defn part-2 []
   (let [input-coords (->> (read-file 2018 6)
-                          (map coordinate-str))
+                          (map str->coordinate))
         boundary (extract-boundary input-coords)]
     (->> (calc-each-grid-sum-of-distance boundary input-coords)
          (filter #(> 10000 %))
