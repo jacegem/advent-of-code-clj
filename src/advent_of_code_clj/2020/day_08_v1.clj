@@ -3,9 +3,9 @@
             [tupelo.core :as t]))
 
 
-(def state {:registers {:acc 0}
-            :pc 0
-            :programs {0 {:op :acc :value 12}}})
+;; (def state {:registers {:acc 0}
+;;             :pc 0
+;;             :programs {0 {:op :acc :value 12}}})
 
 (defn read-file [year day & {:keys [type]}]
   (let [filepath (if (= type :sample)
@@ -25,21 +25,19 @@
 (defn init-state []
   {:acc 0
    :index 0
-
    :visited-indexes []
    :instructions (-> (read-file 2020 8)
                      parse-instructions)})
 
-
 (defn run-instruction
   "각 op 에 따라 값을 업데이트"
-  [{:keys [acc op value index] :as instruction}]
+  [{:keys [acc op value index] :as state}]
   (case op
-    :nop (assoc instruction :index (inc index))
-    :acc (-> instruction
+    :nop (assoc state :index (inc index))
+    :acc (-> state
              (assoc :acc (+ acc value))
              (assoc :index (inc index)))
-    :jmp (assoc instruction :index (+ index value))))
+    :jmp (assoc state :index (+ index value))))
 
 (defn visit-instructions [{:keys [instructions index visited-indexes acc] :as state}]
   (cond
@@ -52,6 +50,7 @@
                 (assoc :index index)
                 (assoc :acc acc)
                 (assoc :visited-indexes visited-indexes)))))
+(.contains [1 2 3 4] 4)
 
 
 (defn fix-instructions [[id instruction] state]
