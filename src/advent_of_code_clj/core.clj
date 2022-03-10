@@ -8,6 +8,8 @@
       (slurp)
       (trim-newline)))
 
+
+
 (defn get-lines [year day]
   (let [input (get-input year day)]
     (split-lines input)))

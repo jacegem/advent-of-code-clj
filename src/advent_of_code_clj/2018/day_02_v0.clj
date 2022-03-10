@@ -1,7 +1,6 @@
-(ns advent-of-code-clj.2018.day-02 
+(ns advent-of-code-clj.2018.day-02
   (:require [clojure.string :as string]
-            [clojure.data :refer [diff]]
-            ))
+            [clojure.data :refer [diff]]))
 
 
 ;; https://adventofcode.com/2018/day/2
@@ -15,33 +14,32 @@
 words
 
 (def input
-    (slurp "resources/2018/input_02.txt"))
+  (slurp "resources/2018/input_02.txt"))
 
 (def splited
-    (string/split-lines input))
+  (string/split-lines input))
 
 splited
 
 (def parsed
-    (map #(string/split % #"") splited))
+  (map #(string/split % #"") splited))
 
 parsed
 
 (defn has-n-times [coll n]
   (some #{n}
-            (vals
-             (frequencies coll)))
-    )
+        (vals
+         (frequencies coll))))
 
 ;; (frequencies "abasdfsadfsda")
-    
+
 (defn get-count [times]
   (count
    (filter #(has-n-times % times) parsed)))
 
 (def part-1
   (* (get-count 2) (get-count 3)))
-  
+
 part-1
 
 ;; 범용적 이름보다, 네이밍 싱크 목적, 재사용 가능하도록 
@@ -88,7 +86,7 @@ part-1
 
   (* count-2 count-3))
 
-  
+
 
 
 (first parsed)
@@ -102,16 +100,11 @@ part-1
 (loop [[v & rem] '(1 2 3 4 5)]
   (if (seq? v)
     (recur rem)
-    "end")
-  )
+    "end"))
 
 (loop [[box & rem] parsed]
   (if-let [common (get-common? box rem)]
-    common
-    
-    )
+    common))
 
-  )
-       
 
-         '()
+'()
