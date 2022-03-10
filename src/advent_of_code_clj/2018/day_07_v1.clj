@@ -2,6 +2,9 @@
   (:require [clojure.string :as string]
             [clojure.set :refer [union]]))
 
+;; --- Day 7: The Sum of Its Parts ---
+;; https://adventofcode.com/2018/day/7
+
 (defn read-file [year day & {:keys [type] :as opts}]
   (let [filepath (if (= type :sample)
                    (format "resources/%d/input_%02d_sample.txt" year day)
