@@ -47,6 +47,7 @@
 
 
 
+
   (def input (get-input 2021 7))
   input
 
@@ -73,20 +74,20 @@
 
   (def avg
     (as-> numbers $
-      (reduce + $)
-      (/ $ (count numbers))
-      (int $)))
+          (reduce + $)
+          (/ $ (count numbers))
+          (int $)))
   (def sum
     (as-> numbers $
-      (reduce + $)))
+          (reduce + $)))
   sum
   avg
 
 
   (def fuel
     (as-> avg $
-      (map #(diff $ %) numbers)
-      (reduce + $)))
+          (map #(diff $ %) numbers)
+          (reduce + $)))
   fuel
 
 

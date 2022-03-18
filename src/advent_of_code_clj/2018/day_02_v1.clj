@@ -1,6 +1,6 @@
 (ns advent-of-code-clj.2018.day-02-v1
   (:require [clojure.java.io :as io]
-            [clojure.string :refer [trim-newline split-lines]]))
+            [clojure.string :refer [split-lines trim-newline]]))
 
 ;; https://adventofcode.com/2018/day/2
 ;; --- Day 2: Inventory Management System ---
